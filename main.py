@@ -21,7 +21,17 @@ def main(retention, namespace):
         for volume in pod.spec.volumes:
             if volume.config_map:
                 usedConfigMaps.append(volume.config_map.name)
-    logger.debug(usedConfigMaps)
+        for container in pod.spec.containers:
+            if container.env:
+                for envVariable in container.env:
+                    if envVariable.value_from and envVariable.value_from.config_map_key_ref:
+                        usedConfigMaps.append(envVariable.value_from.config_map_key_ref.name)
+            if container.env_from:
+                for env in container.env_from:
+                    if env.config_map_ref:
+                        usedConfigMaps.append(env.config_map_ref.name)
+
+    logger.info(usedConfigMaps)
 
     logger.debug("*********************")
 
